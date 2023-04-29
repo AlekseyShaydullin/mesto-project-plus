@@ -1,3 +1,4 @@
+{
     "env": {
         "es2021": true,
         "node": true
@@ -36,6 +37,16 @@
                 "js": "never",
                 "ts": "never"
             }
-        ]
-    },
+        ],
+        "no-underscore-dangle": [
+          "error",
+          {
+            "allow": ["_id"]
+          }
+        ],
+        "no-console": 0,
+        "linebreak-style": "off",
+        "no-trailing-spaces": "off",
+        "eol-last": "off"
+    }
 }
