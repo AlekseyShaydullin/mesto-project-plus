@@ -1,12 +1,19 @@
-import express from 'express';
+import express, { Application } from 'express';
 import mongoose from 'mongoose';
 
 const { PORT = 3000 } = process.env;
 
-const app = express();
+const app: Application = express();
 
-mongoose.connect('mongodb://localhost:27017/mestodb');
+const connect = async () => {
+  try {
+    await mongoose.connect('mongodb://localhost:27017/mestodb');
+    app.listen(PORT, () => {
+      console.log(`App listening on port ${PORT}`);
+    });
+  } catch (error) {
+    console.error(error);
+  }
+};
 
-app.listen(PORT, () => {
-  console.log(`App listening on port ${PORT}`);
-});
+connect();
