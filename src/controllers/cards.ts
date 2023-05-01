@@ -6,7 +6,7 @@ import CODE from '../utils/constants';
 
 const getCards = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const cards = await Card.find({});
+    const cards = await Card.find({}).populate(['owner', 'likes']);
     return res.status(CODE.OK).send({ data: cards });
   } catch (error) {
     console.error(error);
@@ -23,7 +23,7 @@ const createCard = async (req: RequestCustom, res: Response, next: NextFunction)
   }
 
   try {
-    const card = await Card.create({ name, link, owner });
+    const card = await Card.create({ name, link, owner }); /* owner = { user } */
     return res.status(CODE.CREATED).json({ data: card });
   } catch (error) {
     console.error(error);
@@ -61,7 +61,8 @@ const putLike = async (req: RequestCustom, res: Response, next: NextFunction) =>
       },
     }, {
       new: true,
-    });
+      runValidators: true,
+    }); /* owner = { user } */
     if (!card) {
       return next(Errors.notFoundError('Карточка не найдена'));
     }
@@ -87,6 +88,7 @@ const removeLike = async (req: RequestCustom, res: Response, next: NextFunction)
       },
     }, {
       new: true,
+      runValidators: true,
     });
     if (!card) {
       return next(Errors.notFoundError('Карточка не найдена'));
