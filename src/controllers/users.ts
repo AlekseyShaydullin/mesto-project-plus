@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
 import Errors from '../errors/errors';
 import User from '../models/user';
+import { RequestCustom } from '../utils/type';
 
 const getUsers = async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -43,4 +44,61 @@ const createUser = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
-export default { getUsers, getUserById, createUser };
+const updateUser = async (req: RequestCustom, res: Response, next: NextFunction) => {
+  const { name, about } = req.body;
+  const id = req.user?._id;
+
+  if (!name || !about) {
+    return next(Errors.badRequestError('Не верные данные пользователя'));
+  }
+
+  try {
+    const user = await User.findByIdAndUpdate(id, {
+      name,
+      about,
+    }, {
+      new: true,
+    });
+
+    if (!user) {
+      return next(Errors.authorizationError('Пользователь не найден'));
+    }
+    return res.status(201).json({ data: user });
+  } catch (error) {
+    console.error(error);
+    return next(Errors.internalError('На сервере произошла ошибка'));
+  }
+};
+
+const updateAvatar = async (req: RequestCustom, res: Response, next: NextFunction) => {
+  const avatar = req.body;
+  const id = req.user?._id;
+
+  if (!avatar) {
+    return next(Errors.badRequestError('Не верные данные пользователя'));
+  }
+
+  try {
+    const user = await User.findByIdAndUpdate(id, {
+      avatar,
+    }, {
+      new: true,
+    });
+
+    if (!user) {
+      return next(Errors.authorizationError('Пользователь не найден'));
+    }
+    return res.status(201).json({ data: user });
+  } catch (error) {
+    console.error(error);
+    return next(Errors.internalError('На сервере произошла ошибка'));
+  }
+};
+
+export default {
+  getUsers,
+  getUserById,
+  createUser,
+  updateUser,
+  updateAvatar,
+};

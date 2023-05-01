@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
 import Card from '../models/card';
 import Errors from '../errors/errors';
-import { RequestCustom } from '../type';
+import { RequestCustom } from '../utils/type';
 
 const getCards = async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -45,4 +45,62 @@ const removeCard = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
-export default { getCards, createCard, removeCard };
+const putLike = async (req: RequestCustom, res: Response, next: NextFunction) => {
+  const { cardId } = req.params;
+  const id = req.user?._id;
+
+  if (!cardId) {
+    return next(Errors.badRequestError('Не верные данные пользователя'));
+  }
+
+  try {
+    const card = await Card.findByIdAndUpdate(cardId, {
+      $addToSet: {
+        likes: id,
+      },
+    }, {
+      new: true,
+    });
+    if (!card) {
+      return next(Errors.notFoundError('Карточка не найдена'));
+    }
+    return res.status(201).json({ data: card });
+  } catch (error) {
+    console.error(error);
+    return next(Errors.internalError('На сервере произошла ошибка'));
+  }
+};
+
+const removeLike = async (req: RequestCustom, res: Response, next: NextFunction) => {
+  const { cardId } = req.params;
+  const id = req.user?._id;
+
+  if (!cardId) {
+    return next(Errors.badRequestError('Не верные данные пользователя'));
+  }
+
+  try {
+    const card = await Card.findByIdAndUpdate(cardId, {
+      $pull: {
+        likes: id,
+      },
+    }, {
+      new: true,
+    });
+    if (!card) {
+      return next(Errors.notFoundError('Карточка не найдена'));
+    }
+    return res.status(204).json({ data: card });
+  } catch (error) {
+    console.error(error);
+    return next(Errors.internalError('На сервере произошла ошибка'));
+  }
+};
+
+export default {
+  getCards,
+  createCard,
+  removeCard,
+  putLike,
+  removeLike,
+};

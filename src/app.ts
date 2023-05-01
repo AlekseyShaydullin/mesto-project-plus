@@ -6,7 +6,7 @@ import express, {
 } from 'express';
 import mongoose from 'mongoose';
 import router from './routes/index';
-import { RequestCustom } from './type';
+import { RequestCustom } from './utils/type';
 
 const { PORT = 3000 } = process.env;
 
