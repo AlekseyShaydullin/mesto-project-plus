@@ -2,11 +2,12 @@ import { NextFunction, Request, Response } from 'express';
 import Errors from '../errors/errors';
 import User from '../models/user';
 import { RequestCustom } from '../utils/type';
+import CODE from '../utils/constants';
 
 const getUsers = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const users = await User.find({});
-    return res.status(200).json({ data: users });
+    return res.status(CODE.OK).json({ data: users });
   } catch (error) {
     console.error(error);
     return next(Errors.internalError('На сервере произошла ошибка'));
@@ -19,9 +20,9 @@ const getUserById = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const user = await User.findById(id);
     if (!user) {
-      return next(Errors.authorizationError('Пользователь не найден'));
+      return next(Errors.notFoundError('Пользователь не найден'));
     }
-    return res.status(200).json({ data: user });
+    return res.status(CODE.OK).json({ data: user });
   } catch (error) {
     console.error(error);
     return next(Errors.internalError('На сервере произошла ошибка'));
@@ -37,7 +38,7 @@ const createUser = async (req: Request, res: Response, next: NextFunction) => {
 
   try {
     const user = await User.create({ name, about, avatar });
-    return res.status(201).json({ data: user });
+    return res.status(CODE.CREATED).json({ data: user });
   } catch (error) {
     console.error(error);
     return next(Errors.internalError('На сервере произошла ошибка'));
@@ -63,7 +64,7 @@ const updateUser = async (req: RequestCustom, res: Response, next: NextFunction)
     if (!user) {
       return next(Errors.authorizationError('Пользователь не найден'));
     }
-    return res.status(201).json({ data: user });
+    return res.status(CODE.CREATED).json({ data: user });
   } catch (error) {
     console.error(error);
     return next(Errors.internalError('На сервере произошла ошибка'));
@@ -88,7 +89,7 @@ const updateAvatar = async (req: RequestCustom, res: Response, next: NextFunctio
     if (!user) {
       return next(Errors.authorizationError('Пользователь не найден'));
     }
-    return res.status(201).json({ data: user });
+    return res.status(CODE.CREATED).json({ data: user });
   } catch (error) {
     console.error(error);
     return next(Errors.internalError('На сервере произошла ошибка'));

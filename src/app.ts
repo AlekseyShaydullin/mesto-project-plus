@@ -8,12 +8,13 @@ import mongoose from 'mongoose';
 import router from './routes/index';
 import { RequestCustom } from './utils/type';
 
+const server: string = '127.0.0.1:27017';
+const db: string = 'mestodb';
 const { PORT = 3000 } = process.env;
 
 const app: Application = express();
 
 app.use(json());
-app.use('/', router);
 
 app.use((req: RequestCustom, res: Response, next: NextFunction) => {
   req.user = {
@@ -23,9 +24,12 @@ app.use((req: RequestCustom, res: Response, next: NextFunction) => {
   next();
 });
 
+app.use('/', router);
+
 const connect = async () => {
   try {
-    await mongoose.connect('mongodb://127.0.0.1:27017/mestodb');
+    mongoose.set('strictQuery', true);
+    await mongoose.connect(`mongodb://${server}/${db}`);
     console.log('MongoDB connected =)');
 
     app.listen(PORT, () => {

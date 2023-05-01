@@ -44,9 +44,6 @@
             "allow": ["_id"]
           }
         ],
-        "no-console": 0,
         "linebreak-style": "off",
-        "no-trailing-spaces": "off",
-        "eol-last": "off"
     }
 }
