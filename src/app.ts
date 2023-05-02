@@ -7,6 +7,7 @@ import express, {
 import mongoose from 'mongoose';
 import router from './routes/index';
 import { RequestCustom } from './utils/type';
+import errorsMiddleware from './middlewares/errors';
 
 const server: string = '127.0.0.1:27017';
 const db: string = 'mestodb';
@@ -18,13 +19,15 @@ app.use(json());
 
 app.use((req: RequestCustom, res: Response, next: NextFunction) => {
   req.user = {
-    _id: '644e7e7ea07bb507cdb036f7',
+    _id: '645136e171ac62a6ad508c2c',
   };
 
   next();
 });
 
 app.use('/', router);
+
+app.use(errorsMiddleware);
 
 const connect = async () => {
   try {

@@ -4,9 +4,10 @@ import {
   Request,
   Response,
 } from 'express';
-import Errors from '../errors/errors';
 import userRouter from './users';
 import cardRouter from './cards';
+
+const CustomError = require('../errors/CustomError');
 
 const router = Router();
 
@@ -14,7 +15,7 @@ router.use('/users', userRouter);
 router.use('/cards', cardRouter);
 
 router.use((req: Request, res: Response, next: NextFunction) => {
-  next(Errors.notFoundError('Страница не найдена'));
+  next(CustomError.NotFoundError('Страница не найдена'));
 });
 
 export default router;

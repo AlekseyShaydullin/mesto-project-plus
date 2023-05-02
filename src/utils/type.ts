@@ -5,8 +5,3 @@ export interface RequestCustom extends Request {
     _id: string;
   };
 }
-
-export interface IError {
-  status: number;
-  message: string;
-}

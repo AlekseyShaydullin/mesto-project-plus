@@ -1,60 +1,59 @@
+import mongoose from 'mongoose';
 import { NextFunction, Request, Response } from 'express';
 import Card from '../models/card';
-import Errors from '../errors/errors';
 import { RequestCustom } from '../utils/type';
-import CODE from '../utils/constants';
+import HttpStatusCode from '../utils/constants';
+
+const CustomError = require('../errors/CustomError');
 
 const getCards = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const cards = await Card.find({}).populate(['owner', 'likes']);
-    return res.status(CODE.OK).send({ data: cards });
+    return res.status(HttpStatusCode.OK).send({ data: cards });
   } catch (error) {
-    console.error(error);
-    return next(Errors.internalError('На сервере произошла ошибка'));
+    return next(error);
   }
 };
 
 const createCard = async (req: RequestCustom, res: Response, next: NextFunction) => {
-  const { name, link } = req.body;
-  const owner = req.user?._id;
-
-  if (!name || !link || !owner) {
-    return next(Errors.badRequestError('Не верные данные пользователя'));
-  }
-
   try {
-    const card = await Card.create({ name, link, owner }); /* owner = { user } */
-    return res.status(CODE.CREATED).json({ data: card });
+    const { name, link } = req.body;
+    const owner = req.user?._id;
+    const card = await Card.create({ name, link, owner });
+    return res.status(HttpStatusCode.CREATED).json({ data: card });
   } catch (error) {
-    console.error(error);
-    return next(Errors.internalError('На сервере произошла ошибка'));
+    if (error instanceof mongoose.Error.ValidationError) {
+      return res.status(HttpStatusCode.BAD_REQUEST).send({ message: 'Ошибка при вводе данных' });
+    }
+    return next(error);
   }
 };
 
-const removeCard = async (req: Request, res: Response, next: NextFunction) => {
-  const { cardId } = req.params;
-
+const removeCard = async (req: RequestCustom, res: Response, next: NextFunction) => {
   try {
-    const card = await Card.findByIdAndRemove(cardId);
-    if (!card) {
-      return next(Errors.authorizationError('Вы не можете удалить карточку другого пользователя'));
+    const { cardId } = req.params;
+    const cardToDelete = await Card.findById(cardId).orFail();
+    if (cardToDelete.owner.toString() !== req.user?._id) {
+      throw CustomError.Unauthorized('Вы не можете удалить карточку другого пользователя');
     }
-    return res.status(CODE.NO_CONTENT).json({ data: card });
+    return res.status(HttpStatusCode.NO_CONTENT).json({ data: cardToDelete });
   } catch (error) {
-    console.error(error);
-    return next(Errors.internalError('На сервере произошла ошибка'));
+    if (error instanceof mongoose.Error.DocumentNotFoundError) {
+      return res.status(HttpStatusCode.BAD_REQUEST).send({ message: 'Карточка другого пользователя' });
+    }
+    return next(error);
   }
 };
 
 const putLike = async (req: RequestCustom, res: Response, next: NextFunction) => {
-  const { cardId } = req.params;
-  const id = req.user?._id;
-
-  if (!cardId) {
-    return next(Errors.badRequestError('Не верные данные пользователя'));
-  }
-
   try {
+    const { cardId } = req.params;
+    const id = req.user?._id;
+
+    if (!cardId) {
+      throw CustomError.BadRequest('Нет такой карточки');
+    }
+
     const card = await Card.findByIdAndUpdate(cardId, {
       $addToSet: {
         likes: id,
@@ -62,26 +61,28 @@ const putLike = async (req: RequestCustom, res: Response, next: NextFunction) =>
     }, {
       new: true,
       runValidators: true,
-    }); /* owner = { user } */
+    });
     if (!card) {
-      return next(Errors.notFoundError('Карточка не найдена'));
+      throw CustomError.NotFoundError('Карточка не найдена');
     }
-    return res.status(CODE.CREATED).json({ data: card });
+    return res.status(HttpStatusCode.CREATED).json({ data: card });
   } catch (error) {
-    console.error(error);
-    return next(Errors.internalError('На сервере произошла ошибка'));
+    if (error instanceof mongoose.Error.CastError) {
+      return res.status(HttpStatusCode.BAD_REQUEST).send({ message: 'Не верный ID карточки' });
+    }
+    return next(error);
   }
 };
 
 const removeLike = async (req: RequestCustom, res: Response, next: NextFunction) => {
-  const { cardId } = req.params;
-  const id = req.user?._id;
-
-  if (!cardId) {
-    return next(Errors.badRequestError('Не верные данные пользователя'));
-  }
-
   try {
+    const { cardId } = req.params;
+    const id = req.user?._id;
+
+    if (!cardId) {
+      throw CustomError.BadRequest('Не корректные данные');
+    }
+
     const card = await Card.findByIdAndUpdate(cardId, {
       $pull: {
         likes: id,
@@ -91,12 +92,14 @@ const removeLike = async (req: RequestCustom, res: Response, next: NextFunction)
       runValidators: true,
     });
     if (!card) {
-      return next(Errors.notFoundError('Карточка не найдена'));
+      throw CustomError.NotFoundError('Карточка не найдена');
     }
-    return res.status(CODE.NO_CONTENT).json({ data: card });
+    return res.status(HttpStatusCode.NO_CONTENT).json({ data: card });
   } catch (error) {
-    console.error(error);
-    return next(Errors.internalError('На сервере произошла ошибка'));
+    if (error instanceof mongoose.Error.CastError) {
+      return res.status(HttpStatusCode.BAD_REQUEST).send({ message: 'Не верный ID карточки' });
+    }
+    return next(error);
   }
 };
 

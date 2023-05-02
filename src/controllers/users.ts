@@ -1,98 +1,98 @@
+import mongoose from 'mongoose';
 import { NextFunction, Request, Response } from 'express';
-import Errors from '../errors/errors';
 import User from '../models/user';
 import { RequestCustom } from '../utils/type';
-import CODE from '../utils/constants';
+import HttpStatusCode from '../utils/constants';
+
+const CustomError = require('../errors/CustomError');
 
 const getUsers = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const users = await User.find({});
-    return res.status(CODE.OK).json({ data: users });
+    return res.status(HttpStatusCode.OK).json({ data: users });
   } catch (error) {
-    console.error(error);
-    return next(Errors.internalError('На сервере произошла ошибка'));
+    return next(error);
   }
 };
 
 const getUserById = async (req: Request, res: Response, next: NextFunction) => {
-  const { id } = req.params;
-
   try {
+    const { id } = req.params;
     const user = await User.findById(id);
     if (!user) {
-      return next(Errors.notFoundError('Пользователь не найден'));
+      throw CustomError.NotFoundError('Нет пользователя с таким id');
     }
-    return res.status(CODE.OK).json({ data: user });
+    return res.status(HttpStatusCode.OK).json({ data: user });
   } catch (error) {
-    console.error(error);
-    return next(Errors.internalError('На сервере произошла ошибка'));
+    if (error instanceof mongoose.Error.CastError) {
+      return res.status(HttpStatusCode.BAD_REQUEST).send({ message: 'Не верный ID пользователя' });
+    }
+    return next(error);
   }
 };
 
 const createUser = async (req: Request, res: Response, next: NextFunction) => {
-  const { name, about, avatar } = req.body;
-
-  if (!name || !about || !avatar) {
-    return next(Errors.badRequestError('Не верные данные пользователя'));
-  }
-
   try {
+    const { name, about, avatar } = req.body;
     const user = await User.create({ name, about, avatar });
-    return res.status(CODE.CREATED).json({ data: user });
+    return res.status(HttpStatusCode.CREATED).json({ data: user });
   } catch (error) {
-    console.error(error);
-    return next(Errors.internalError('На сервере произошла ошибка'));
+    if (error instanceof mongoose.Error.ValidationError) {
+      return res.status(HttpStatusCode.BAD_REQUEST).send({ message: 'Ошибка в вводе данных пользователя' });
+    }
+    return next(error);
   }
 };
 
 const updateUser = async (req: RequestCustom, res: Response, next: NextFunction) => {
-  const { name, about } = req.body;
-  const id = req.user?._id;
-
-  if (!name || !about) {
-    return next(Errors.badRequestError('Не верные данные пользователя'));
-  }
-
   try {
+    const { name, about } = req.body;
+    const id = req.user?._id;
     const user = await User.findByIdAndUpdate(id, {
       name,
       about,
     }, {
       new: true,
+      runValidators: true,
     });
-
     if (!user) {
-      return next(Errors.authorizationError('Пользователь не найден'));
+      throw CustomError.NotFoundError('Нет пользователя с таким id');
     }
-    return res.status(CODE.CREATED).json({ data: user });
+    return res.status(HttpStatusCode.CREATED).json({ data: user });
   } catch (error) {
-    console.error(error);
-    return next(Errors.internalError('На сервере произошла ошибка'));
+    if (error instanceof mongoose.Error.ValidationError) {
+      return res.status(HttpStatusCode.BAD_REQUEST).send({ message: 'Ошибка в вводе данных пользователя' });
+    }
+    if (error instanceof mongoose.Error.CastError) {
+      return res.status(HttpStatusCode.BAD_REQUEST).send({ message: 'Не верный ID пользователя' });
+    }
+    return next(error);
   }
 };
 
 const updateAvatar = async (req: RequestCustom, res: Response, next: NextFunction) => {
-  const avatar = req.body;
-  const id = req.user?._id;
-
-  if (!avatar) {
-    return next(Errors.badRequestError('Не верные данные пользователя'));
-  }
-
   try {
+    const avatar = req.body;
+    const id = req.user?._id;
     const user = await User.findByIdAndUpdate(id, {
       avatar,
     }, {
       new: true,
+      runValidators: true,
     });
 
     if (!user) {
-      return next(Errors.authorizationError('Пользователь не найден'));
+      throw CustomError.NotFoundError('Нет пользователя с таким id');
     }
-    return res.status(CODE.CREATED).json({ data: user });
+    return res.status(HttpStatusCode.CREATED).json({ data: user });
   } catch (error) {
-    console.error(error);
-    return next(Errors.internalError('На сервере произошла ошибка'));
+    if (error instanceof mongoose.Error.ValidationError) {
+      return res.status(HttpStatusCode.BAD_REQUEST).send({ message: 'Ошибка в вводе данных аватара' });
+    }
+    if (error instanceof mongoose.Error.CastError) {
+      return res.status(HttpStatusCode.BAD_REQUEST).send({ message: 'Не верный ID пользователя' });
+    }
+    return next(error);
   }
 };
 
