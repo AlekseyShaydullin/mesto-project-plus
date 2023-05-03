@@ -32,9 +32,6 @@ const updateUserMiddleware = async (
     if (error instanceof mongoose.Error.ValidationError) {
       return res.status(HttpStatusCode.BAD_REQUEST).send({ message: 'Ошибка в вводе данных пользователя' });
     }
-    if (error instanceof mongoose.Error.CastError) {
-      return res.status(HttpStatusCode.BAD_REQUEST).send({ message: 'Не верный ID пользователя' });
-    }
     return next(error);
   }
 };

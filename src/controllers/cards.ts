@@ -37,10 +37,14 @@ const removeCard = async (req: RequestCustom, res: Response, next: NextFunction)
     if (cardToDelete.owner.toString() !== req.user?._id) {
       throw CustomError.Unauthorized('Вы не можете удалить карточку другого пользователя');
     }
-    return res.status(HttpStatusCode.NO_CONTENT).json({ data: cardToDelete });
+    const deleteCard = await cardToDelete.deleteOne();
+    return res.status(HttpStatusCode.NO_CONTENT).json({ data: deleteCard });
   } catch (error) {
     if (error instanceof mongoose.Error.DocumentNotFoundError) {
       return res.status(HttpStatusCode.BAD_REQUEST).send({ message: 'Карточка другого пользователя' });
+    }
+    if (error instanceof mongoose.Error.CastError) {
+      return res.status(HttpStatusCode.BAD_REQUEST).send({ message: 'Не верный ID пользователя' });
     }
     return next(error);
   }
