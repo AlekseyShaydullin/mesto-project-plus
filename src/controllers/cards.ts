@@ -3,6 +3,7 @@ import { NextFunction, Request, Response } from 'express';
 import Card from '../models/card';
 import { RequestCustom } from '../utils/type';
 import HttpStatusCode from '../utils/constants';
+import updateLikeCardMiddleware from '../middlewares/updateLikeCardMiddleware';
 
 const CustomError = require('../errors/CustomError');
 
@@ -45,62 +46,14 @@ const removeCard = async (req: RequestCustom, res: Response, next: NextFunction)
   }
 };
 
-const putLike = async (req: RequestCustom, res: Response, next: NextFunction) => {
-  try {
-    const { cardId } = req.params;
-    const id = req.user?._id;
-
-    if (!cardId) {
-      throw CustomError.BadRequest('Нет такой карточки');
-    }
-
-    const card = await Card.findByIdAndUpdate(cardId, {
-      $addToSet: {
-        likes: id,
-      },
-    }, {
-      new: true,
-      runValidators: true,
-    });
-    if (!card) {
-      throw CustomError.NotFoundError('Карточка не найдена');
-    }
-    return res.status(HttpStatusCode.CREATED).json({ data: card });
-  } catch (error) {
-    if (error instanceof mongoose.Error.CastError) {
-      return res.status(HttpStatusCode.BAD_REQUEST).send({ message: 'Не верный ID карточки' });
-    }
-    return next(error);
-  }
+const putLike = (req: RequestCustom, res: Response, next: NextFunction) => {
+  const handlePutLike = true;
+  updateLikeCardMiddleware(req, res, next, handlePutLike);
 };
 
-const removeLike = async (req: RequestCustom, res: Response, next: NextFunction) => {
-  try {
-    const { cardId } = req.params;
-    const id = req.user?._id;
-
-    if (!cardId) {
-      throw CustomError.BadRequest('Не корректные данные');
-    }
-
-    const card = await Card.findByIdAndUpdate(cardId, {
-      $pull: {
-        likes: id,
-      },
-    }, {
-      new: true,
-      runValidators: true,
-    });
-    if (!card) {
-      throw CustomError.NotFoundError('Карточка не найдена');
-    }
-    return res.status(HttpStatusCode.NO_CONTENT).json({ data: card });
-  } catch (error) {
-    if (error instanceof mongoose.Error.CastError) {
-      return res.status(HttpStatusCode.BAD_REQUEST).send({ message: 'Не верный ID карточки' });
-    }
-    return next(error);
-  }
+const removeLike = (req: RequestCustom, res: Response, next: NextFunction) => {
+  const handlePutLike = false;
+  updateLikeCardMiddleware(req, res, next, handlePutLike);
 };
 
 export default {
