@@ -19,7 +19,7 @@ app.use(json());
 
 app.use((req: RequestCustom, res: Response, next: NextFunction) => {
   req.user = {
-    _id: '645136e171ac62a6ad508c2c',
+    _id: '644e7e7ea07bb507cdb036f7',
   };
 
   next();

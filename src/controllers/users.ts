@@ -3,6 +3,7 @@ import { NextFunction, Request, Response } from 'express';
 import User from '../models/user';
 import { RequestCustom } from '../utils/type';
 import HttpStatusCode from '../utils/constants';
+import updateUserMiddleware from '../middlewares/updateUserMiddleware';
 
 const CustomError = require('../errors/CustomError');
 
@@ -44,56 +45,14 @@ const createUser = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
-const updateUser = async (req: RequestCustom, res: Response, next: NextFunction) => {
-  try {
-    const { name, about } = req.body;
-    const id = req.user?._id;
-    const user = await User.findByIdAndUpdate(id, {
-      name,
-      about,
-    }, {
-      new: true,
-      runValidators: true,
-    });
-    if (!user) {
-      throw CustomError.NotFoundError('Нет пользователя с таким id');
-    }
-    return res.status(HttpStatusCode.CREATED).json({ data: user });
-  } catch (error) {
-    if (error instanceof mongoose.Error.ValidationError) {
-      return res.status(HttpStatusCode.BAD_REQUEST).send({ message: 'Ошибка в вводе данных пользователя' });
-    }
-    if (error instanceof mongoose.Error.CastError) {
-      return res.status(HttpStatusCode.BAD_REQUEST).send({ message: 'Не верный ID пользователя' });
-    }
-    return next(error);
-  }
+const updateUser = (req: RequestCustom, res: Response, next: NextFunction) => {
+  const handleUpdateUser = true;
+  updateUserMiddleware(req, res, next, handleUpdateUser);
 };
 
-const updateAvatar = async (req: RequestCustom, res: Response, next: NextFunction) => {
-  try {
-    const avatar = req.body;
-    const id = req.user?._id;
-    const user = await User.findByIdAndUpdate(id, {
-      avatar,
-    }, {
-      new: true,
-      runValidators: true,
-    });
-
-    if (!user) {
-      throw CustomError.NotFoundError('Нет пользователя с таким id');
-    }
-    return res.status(HttpStatusCode.CREATED).json({ data: user });
-  } catch (error) {
-    if (error instanceof mongoose.Error.ValidationError) {
-      return res.status(HttpStatusCode.BAD_REQUEST).send({ message: 'Ошибка в вводе данных аватара' });
-    }
-    if (error instanceof mongoose.Error.CastError) {
-      return res.status(HttpStatusCode.BAD_REQUEST).send({ message: 'Не верный ID пользователя' });
-    }
-    return next(error);
-  }
+const updateAvatar = (req: RequestCustom, res: Response, next: NextFunction) => {
+  const handleUpdateUser = false;
+  updateUserMiddleware(req, res, next, handleUpdateUser);
 };
 
 export default {
