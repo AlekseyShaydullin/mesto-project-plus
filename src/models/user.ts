@@ -1,5 +1,13 @@
-import { model, Schema, Document } from 'mongoose';
+import {
+  model,
+  Schema,
+  Document,
+  Model,
+} from 'mongoose';
+import bcrypt from 'bcrypt';
 import validation from '../utils/validators';
+
+const CustomError = require('../errors/CustomError');
 
 interface IUser extends Document {
   name: string,
@@ -9,7 +17,14 @@ interface IUser extends Document {
   password: string,
 }
 
-const userSchema = new Schema<IUser>({
+interface IUserDocument extends Document<IUser>{}
+
+interface UserModel extends Model<IUser> {
+  // eslint-disable-next-line no-unused-vars
+  findUserByCredentials: (email: string, password: string) => Promise<IUserDocument>
+}
+
+const userSchema = new Schema<IUser, UserModel>({
   name: {
     type: String,
     minlength: 2,
@@ -42,4 +57,16 @@ const userSchema = new Schema<IUser>({
   },
 });
 
-export default model('user', userSchema);
+userSchema.static('findUserByCredentials', async function findUserByCredentials(email: string, password: string) {
+  const user = await this.findOne({ email }).select('+password');
+  if (!user) {
+    throw CustomError.Unauthorized('Не верно введен логин или пароль');
+  }
+  const userValid = await bcrypt.compare(password, user.password);
+  if (!userValid) {
+    throw CustomError.Unauthorized('Не верно введен логин или пароль');
+  }
+  return user;
+});
+
+export default model<IUser, UserModel>('user', userSchema);
