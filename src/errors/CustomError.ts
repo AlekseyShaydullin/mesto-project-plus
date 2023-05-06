@@ -24,6 +24,10 @@ class CustomError extends Error implements IError {
   static BadRequest(message: string) {
     return new CustomError(HttpStatusCode.BAD_REQUEST, message);
   }
+
+  static Conflict(message: string) {
+    return new CustomError(HttpStatusCode.CONFLICT, message);
+  }
 }
 
 module.exports = CustomError;
