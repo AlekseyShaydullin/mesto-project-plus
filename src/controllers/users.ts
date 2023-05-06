@@ -36,6 +36,22 @@ const getUserById = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
+const getUserInfo = async (req: RequestCustom, res: Response, next: NextFunction) => {
+  try {
+    const owner = req.user?._id;
+    const user = await User.findById(owner);
+    if (!user) {
+      throw CustomError.NotFoundError('Пользователь не найден');
+    }
+    return res.status(HttpStatusCode.OK).send({ data: user });
+  } catch (error) {
+    if (error instanceof mongoose.Error.CastError) {
+      return res.status(HttpStatusCode.BAD_REQUEST).send({ message: 'Не верный ID пользователя' });
+    }
+    return next(error);
+  }
+};
+
 const createUser = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const {
@@ -108,6 +124,7 @@ const updateAvatar = (req: RequestCustom, res: Response, next: NextFunction) => 
 export default {
   getUsers,
   getUserById,
+  getUserInfo,
   createUser,
   loginUser,
   updateUser,
