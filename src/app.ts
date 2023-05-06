@@ -8,6 +8,8 @@ import mongoose from 'mongoose';
 import router from './routes/index';
 import { RequestCustom } from './utils/type';
 import errorsMiddleware from './middlewares/errors';
+import userControllers from './controllers/users';
+import authMiddleware from './middlewares/auth';
 
 const server: string = '127.0.0.1:27017';
 const db: string = 'mestodb';
@@ -25,6 +27,9 @@ app.use((req: RequestCustom, res: Response, next: NextFunction) => {
   next();
 });
 
+app.use('/signin', userControllers.loginUser);
+app.use('/signup', userControllers.createUser);
+app.use(authMiddleware);
 app.use('/', router);
 
 app.use(errorsMiddleware);
