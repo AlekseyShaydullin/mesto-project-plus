@@ -3,6 +3,7 @@ import express, {
   json,
 } from 'express';
 import mongoose from 'mongoose';
+import { errors } from 'celebrate';
 import router from './routes/index';
 import errorsMiddleware from './middlewares/errors';
 import userControllers from './controllers/users';
@@ -23,6 +24,7 @@ app.use('/signup', validation.createUserValidation, userControllers.createUser);
 app.use(authMiddleware);
 app.use('/', router);
 app.use(logger.errorLogger);
+app.use(errors());
 app.use(errorsMiddleware);
 
 const connect = async () => {
