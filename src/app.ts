@@ -8,6 +8,7 @@ import errorsMiddleware from './middlewares/errors';
 import userControllers from './controllers/users';
 import authMiddleware from './middlewares/auth';
 import logger from './middlewares/logger';
+import validation from './validation/userValidation';
 
 const server: string = '127.0.0.1:27017';
 const db: string = 'mestodb';
@@ -17,8 +18,8 @@ const app: Application = express();
 
 app.use(json());
 app.use(logger.requestLogger);
-app.use('/signin', userControllers.loginUser);
-app.use('/signup', userControllers.createUser);
+app.use('/signin', validation.loginUserValidation, userControllers.loginUser);
+app.use('/signup', validation.createUserValidation, userControllers.createUser);
 app.use(authMiddleware);
 app.use('/', router);
 app.use(logger.errorLogger);
