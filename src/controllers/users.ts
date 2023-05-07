@@ -99,9 +99,6 @@ const loginUser = async (req: RequestCustom, res: Response, next: NextFunction) 
       token: jwt.sign({ _id: user._id }, process.env.TOKEN_ENV as string || secretKey, { expiresIn: '7d' }),
     });
   } catch (error) {
-    if (error instanceof mongoose.Error.ValidationError) {
-      return res.status(HttpStatusCode.BAD_REQUEST).send({ message: 'Ошибка в вводе данных пользователя' });
-    }
     return next(error);
   }
 };
