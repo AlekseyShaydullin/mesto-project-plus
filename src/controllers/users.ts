@@ -7,8 +7,7 @@ import { RequestCustom } from '../utils/type';
 import HttpStatusCode from '../utils/constants';
 import updateUserMiddleware from '../middlewares/updateUserMiddleware';
 import { JWT_SECRET } from '../config';
-
-const CustomError = require('../errors/CustomError');
+import searchUser from '../utils/wrappers';
 
 const getUsers = async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -21,12 +20,8 @@ const getUsers = async (req: Request, res: Response, next: NextFunction) => {
 
 const getUserById = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { id } = req.params;
-    const user = await User.findById(id);
-    if (!user) {
-      throw CustomError.NotFoundError('Нет пользователя с таким id');
-    }
-    return res.json({ data: user });
+    const auth = false;
+    return searchUser(req, res, next, auth);
   } catch (error) {
     if (error instanceof mongoose.Error.CastError) {
       return res.status(HttpStatusCode.BAD_REQUEST).send({ message: 'Не верный ID пользователя' });
@@ -37,12 +32,8 @@ const getUserById = async (req: Request, res: Response, next: NextFunction) => {
 
 const getUserInfo = async (req: RequestCustom, res: Response, next: NextFunction) => {
   try {
-    const owner = req.user?._id;
-    const user = await User.findById(owner);
-    if (!user) {
-      throw CustomError.NotFoundError('Пользователь не найден');
-    }
-    return res.send({ data: user });
+    const auth = true;
+    return searchUser(req, res, next, auth);
   } catch (error) {
     if (error instanceof mongoose.Error.CastError) {
       return res.status(HttpStatusCode.BAD_REQUEST).send({ message: 'Не верный ID пользователя' });
