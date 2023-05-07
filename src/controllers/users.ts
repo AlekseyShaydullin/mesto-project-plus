@@ -62,15 +62,6 @@ const createUser = async (req: Request, res: Response, next: NextFunction) => {
       password,
     } = req.body;
 
-    if (!email || !password) {
-      throw CustomError.BAD_REQUEST('Не верно введен логин или пароль');
-    }
-
-    const uniqUser = await User.findOne({ email });
-    if (uniqUser) {
-      throw CustomError.CONFLICT('Пользователь с таким почтовым адресом уже существует');
-    }
-
     const hashPassword = await bcrypt.hash(password, 11);
 
     const user = await User.create({
@@ -80,6 +71,7 @@ const createUser = async (req: Request, res: Response, next: NextFunction) => {
       email,
       password: hashPassword,
     });
+
     return res.status(HttpStatusCode.CREATED).json({
       data: {
         name: user.name,
@@ -88,7 +80,10 @@ const createUser = async (req: Request, res: Response, next: NextFunction) => {
         email: user.email,
       },
     });
-  } catch (error) {
+  } catch (error: any) {
+    if (error.name === 'MongoError' && error.code === 11000) {
+      return res.status(HttpStatusCode.CONFLICT).send({ message: 'Пользователь с таким почтовым адресом уже существует' });
+    }
     if (error instanceof mongoose.Error.ValidationError) {
       return res.status(HttpStatusCode.BAD_REQUEST).send({ message: 'Ошибка в вводе данных пользователя' });
     }
