@@ -30,19 +30,17 @@ const userSchema = new Schema<IUser, UserModel>({
     minlength: 2,
     maxlength: 30,
     default: 'Жак-Ив Кусто',
-    validate: validation.nameValidationUser,
   },
   about: {
     type: String,
     minlength: 2,
     maxlength: 200,
     default: 'Исследователь',
-    validate: validation.aboutValidationUser,
   },
   avatar: {
     type: String,
     default: 'https://pictures.s3.yandex.net/resources/jacques-cousteau_1604399756.png',
-    validate: validation.avatarValidationUser,
+    validate: validation.linkValidationUser,
   },
   email: {
     type: String,
@@ -57,16 +55,20 @@ const userSchema = new Schema<IUser, UserModel>({
   },
 });
 
-userSchema.static('findUserByCredentials', async function findUserByCredentials(email: string, password: string) {
-  const user = await this.findOne({ email }).select('+password');
-  if (!user) {
-    throw CustomError.Unauthorized('Не верно введен логин или пароль');
-  }
-  const userValid = await bcrypt.compare(password, user.password);
-  if (!userValid) {
-    throw CustomError.Unauthorized('Не верно введен логин или пароль');
-  }
-  return user;
+userSchema.static('findUserByCredentials', function findUserByCredentials(email: string, password: string) {
+  return this.findOne({ email }).select('+password')
+    .then((user) => {
+      if (!user) {
+        throw CustomError.Unauthorized('Неверно введен логин или пароль');
+      }
+      return bcrypt.compare(password, user.password)
+        .then((userValid) => {
+          if (!userValid) {
+            throw CustomError.Unauthorized('Неверно введен логин или пароль');
+          }
+          return user;
+        });
+    });
 });
 
 export default model<IUser, UserModel>('user', userSchema);

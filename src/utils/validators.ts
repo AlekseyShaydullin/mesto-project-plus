@@ -7,17 +7,7 @@ export interface IValidationOptions {
   message: string;
 }
 
-const nameValidationUser: IValidationOptions = {
-  validator: (name: string) => name.length > 2 && name.length <= 30,
-  message: 'Имя пользователя должно быть неменее 2 символов или неболее 30',
-};
-
-const aboutValidationUser: IValidationOptions = {
-  validator: (about: string) => about.length > 2 && about.length <= 200,
-  message: 'Описание пользователя должно быть неменее 2 символов и небольее 200',
-};
-
-const avatarValidationUser: IValidationOptions = {
+const linkValidationUser: IValidationOptions = {
   validator: (link: string) => urlRegExp.test(link),
   message: 'Некорректная ссылка на аватар',
 };
@@ -28,8 +18,6 @@ const emailValidationUser: IValidationOptions = {
 };
 
 export default {
-  nameValidationUser,
-  aboutValidationUser,
-  avatarValidationUser,
+  linkValidationUser,
   emailValidationUser,
 };
