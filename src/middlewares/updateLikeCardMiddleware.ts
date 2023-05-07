@@ -37,7 +37,7 @@ const updateLikeCardMiddleware = async (
     return res.status(HttpStatusCode.CREATED).json({ data: card });
   } catch (error) {
     if (error instanceof mongoose.Error.CastError) {
-      return res.status(HttpStatusCode.BAD_REQUEST).send({ message: 'Не верный ID карточки' });
+      return next(CustomError.BadRequest('Не верный ID карточки'));
     }
     return next(error);
   }

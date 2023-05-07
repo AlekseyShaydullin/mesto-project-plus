@@ -9,6 +9,8 @@ import updateUserMiddleware from '../middlewares/updateUserMiddleware';
 import { JWT_SECRET } from '../config';
 import searchUser from '../utils/wrappers';
 
+const CustomError = require('../errors/CustomError');
+
 const getUsers = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const users = await User.find({});
@@ -24,7 +26,7 @@ const getUserById = async (req: Request, res: Response, next: NextFunction) => {
     return searchUser(req, res, next, auth);
   } catch (error) {
     if (error instanceof mongoose.Error.CastError) {
-      return res.status(HttpStatusCode.BAD_REQUEST).send({ message: 'Не верный ID пользователя' });
+      return next(CustomError.BadRequest('Не верный ID пользователя'));
     }
     return next(error);
   }
@@ -36,7 +38,7 @@ const getUserInfo = async (req: RequestCustom, res: Response, next: NextFunction
     return searchUser(req, res, next, auth);
   } catch (error) {
     if (error instanceof mongoose.Error.CastError) {
-      return res.status(HttpStatusCode.BAD_REQUEST).send({ message: 'Не верный ID пользователя' });
+      return next(CustomError.BadRequest('Не верный ID пользователя'));
     }
     return next(error);
   }
@@ -72,10 +74,10 @@ const createUser = async (req: Request, res: Response, next: NextFunction) => {
     });
   } catch (error: any) {
     if (error.name === 'MongoError' && error.code === 11000) {
-      return res.status(HttpStatusCode.CONFLICT).send({ message: 'Пользователь с таким почтовым адресом уже существует' });
+      return next(CustomError.Conflict('Пользователь с таким почтовым адресом уже существует'));
     }
     if (error instanceof mongoose.Error.ValidationError) {
-      return res.status(HttpStatusCode.BAD_REQUEST).send({ message: 'Ошибка в вводе данных пользователя' });
+      return next(CustomError.BadRequest('Ошибка в вводе данных пользователя'));
     }
     return next(error);
   }

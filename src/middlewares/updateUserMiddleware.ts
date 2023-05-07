@@ -30,7 +30,7 @@ const updateUserMiddleware = async (
     return res.status(HttpStatusCode.CREATED).json({ data: user });
   } catch (error) {
     if (error instanceof mongoose.Error.ValidationError) {
-      return res.status(HttpStatusCode.BAD_REQUEST).send({ message: 'Ошибка в вводе данных пользователя' });
+      return next(CustomError.BadRequest('Ошибка в вводе данных пользователя'));
     }
     return next(error);
   }

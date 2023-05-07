@@ -22,7 +22,7 @@ const authMiddleware = async (req: IAuthReq, res: Response, next: NextFunction) 
   try {
     payload = jwt.verify(token, JWT_SECRET);
   } catch (error) {
-    throw CustomError.Unauthorized('Необходима авторизация');
+    return next(CustomError.Unauthorized('Необходима авторизация'));
   }
   req.user = payload as { _id: JwtPayload};
   next();

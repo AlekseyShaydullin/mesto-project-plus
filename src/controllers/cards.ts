@@ -24,7 +24,7 @@ const createCard = async (req: RequestCustom, res: Response, next: NextFunction)
     return res.status(HttpStatusCode.CREATED).json({ data: card });
   } catch (error) {
     if (error instanceof mongoose.Error.ValidationError) {
-      return res.status(HttpStatusCode.BAD_REQUEST).send({ message: 'Ошибка при вводе данных' });
+      return next(CustomError.BadRequest('Ошибка при вводе данных'));
     }
     return next(error);
   }
@@ -41,10 +41,10 @@ const removeCard = async (req: RequestCustom, res: Response, next: NextFunction)
     return res.status(HttpStatusCode.NO_CONTENT).json({ data: deleteCard });
   } catch (error) {
     if (error instanceof mongoose.Error.DocumentNotFoundError) {
-      return res.status(HttpStatusCode.BAD_REQUEST).send({ message: 'Карточка другого пользователя' });
+      return next(CustomError.BadRequest('Карточка другого пользователя'));
     }
     if (error instanceof mongoose.Error.CastError) {
-      return res.status(HttpStatusCode.BAD_REQUEST).send({ message: 'Не верный ID пользователя' });
+      return next(CustomError.BadRequest('Не верный ID пользователя'));
     }
     return next(error);
   }
