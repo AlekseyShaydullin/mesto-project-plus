@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
 import jwt, { JwtPayload } from 'jsonwebtoken';
-import secretKey from '../utils/keys';
+import { JWT_SECRET } from '../config';
 
 const CustomError = require('../errors/CustomError');
 
@@ -20,7 +20,7 @@ const authMiddleware = async (req: IAuthReq, res: Response, next: NextFunction) 
   let payload;
 
   try {
-    payload = jwt.verify(token, process.env.TOKEN_ENV as string || secretKey);
+    payload = jwt.verify(token, JWT_SECRET);
   } catch (error) {
     throw CustomError.Unauthorized('Необходима авторизация');
   }

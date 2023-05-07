@@ -1,13 +1,12 @@
 import mongoose from 'mongoose';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import * as process from 'process';
 import { NextFunction, Request, Response } from 'express';
 import User from '../models/user';
 import { RequestCustom } from '../utils/type';
 import HttpStatusCode from '../utils/constants';
 import updateUserMiddleware from '../middlewares/updateUserMiddleware';
-import secretKey from '../utils/keys';
+import { JWT_SECRET } from '../config';
 
 const CustomError = require('../errors/CustomError');
 
@@ -96,7 +95,7 @@ const loginUser = async (req: RequestCustom, res: Response, next: NextFunction) 
     const { email, password } = req.body;
     const user = await User.findUserByCredentials(email, password);
     return res.send({
-      token: jwt.sign({ _id: user._id }, process.env.TOKEN_ENV as string || secretKey, { expiresIn: '7d' }),
+      token: jwt.sign({ _id: user._id }, JWT_SECRET, { expiresIn: '7d' }),
     });
   } catch (error) {
     return next(error);

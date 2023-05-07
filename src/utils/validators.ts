@@ -1,5 +1,5 @@
 import validator from 'validator';
-import urlRegExp from './urlRegExp';
+import { urlRegExp } from '../config';
 
 export interface IValidationOptions {
   // eslint-disable-next-line no-unused-vars

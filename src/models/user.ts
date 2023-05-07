@@ -6,6 +6,7 @@ import {
 } from 'mongoose';
 import bcrypt from 'bcrypt';
 import validation from '../utils/validators';
+import { defaultUser } from '../config';
 
 const CustomError = require('../errors/CustomError');
 
@@ -29,17 +30,17 @@ const userSchema = new Schema<IUser, UserModel>({
     type: String,
     minlength: 2,
     maxlength: 30,
-    default: 'Жак-Ив Кусто',
+    default: defaultUser.NAME,
   },
   about: {
     type: String,
     minlength: 2,
     maxlength: 200,
-    default: 'Исследователь',
+    default: defaultUser.ABOUT,
   },
   avatar: {
     type: String,
-    default: 'https://pictures.s3.yandex.net/resources/jacques-cousteau_1604399756.png',
+    default: defaultUser.AVATAR,
     validate: validation.linkValidationUser,
   },
   email: {

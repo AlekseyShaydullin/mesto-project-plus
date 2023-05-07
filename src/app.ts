@@ -10,12 +10,7 @@ import userControllers from './controllers/users';
 import authMiddleware from './middlewares/auth';
 import logger from './middlewares/logger';
 import validation from './validation/userValidation';
-
-require('dotenv').config();
-
-const server: string = '127.0.0.1:27017';
-const db: string = 'mestodb';
-const { PORT = 3000 } = process.env;
+import { PORT, server, db } from './config';
 
 const app: Application = express();
 

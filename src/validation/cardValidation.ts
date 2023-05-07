@@ -1,5 +1,5 @@
 import { Joi, celebrate, Segments } from 'celebrate';
-import urlRegExp from '../utils/urlRegExp';
+import { urlRegExp } from '../config';
 
 const createCardValidation = celebrate({
   [Segments.BODY]: Joi.object({
