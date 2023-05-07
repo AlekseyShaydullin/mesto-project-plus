@@ -1,4 +1,3 @@
-const OK: number = 200;
 const CREATED: number = 201;
 const NO_CONTENT: number = 204;
 
@@ -10,7 +9,6 @@ const CONFLICT: number = 409;
 const INTERNAL_SERVER_ERROR: number = 500;
 
 export default {
-  OK,
   CREATED,
   NO_CONTENT,
   BAD_REQUEST,

@@ -10,7 +10,7 @@ const CustomError = require('../errors/CustomError');
 const getCards = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const cards = await Card.find({}).populate(['owner', 'likes']);
-    return res.status(HttpStatusCode.OK).send({ data: cards });
+    return res.send({ data: cards });
   } catch (error) {
     return next(error);
   }

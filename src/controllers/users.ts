@@ -14,7 +14,7 @@ const CustomError = require('../errors/CustomError');
 const getUsers = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const users = await User.find({});
-    return res.status(HttpStatusCode.OK).json({ data: users });
+    return res.json({ data: users });
   } catch (error) {
     return next(error);
   }
@@ -27,7 +27,7 @@ const getUserById = async (req: Request, res: Response, next: NextFunction) => {
     if (!user) {
       throw CustomError.NotFoundError('Нет пользователя с таким id');
     }
-    return res.status(HttpStatusCode.OK).json({ data: user });
+    return res.json({ data: user });
   } catch (error) {
     if (error instanceof mongoose.Error.CastError) {
       return res.status(HttpStatusCode.BAD_REQUEST).send({ message: 'Не верный ID пользователя' });
@@ -43,7 +43,7 @@ const getUserInfo = async (req: RequestCustom, res: Response, next: NextFunction
     if (!user) {
       throw CustomError.NotFoundError('Пользователь не найден');
     }
-    return res.status(HttpStatusCode.OK).send({ data: user });
+    return res.send({ data: user });
   } catch (error) {
     if (error instanceof mongoose.Error.CastError) {
       return res.status(HttpStatusCode.BAD_REQUEST).send({ message: 'Не верный ID пользователя' });
